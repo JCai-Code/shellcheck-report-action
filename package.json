@@ -23,7 +23,8 @@
   "homepage": "https://github.com/JCai-Code/shellcheck-report-action#readme",
   "dependencies": {
     "@actions/core": "^3.0.1",
-    "@actions/exec": "^3.0.0"
+    "@actions/exec": "^3.0.0",
+    "@actions/glob": "^0.7.0"
   },
   "devDependencies": {
     "esbuild": "^0.28.2"
