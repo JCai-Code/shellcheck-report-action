@@ -10,14 +10,6 @@ var __require = /* @__PURE__ */ ((x) => typeof require !== "undefined" ? require
   if (typeof require !== "undefined") return require.apply(this, arguments);
   throw Error('Dynamic require of "' + x + '" is not supported');
 });
-var __esm = (fn, res, err) => function __init() {
-  if (err) throw err[0];
-  try {
-    return fn && (res = (0, fn[__getOwnPropNames(fn)[0]])(fn = 0)), res;
-  } catch (e) {
-    throw err = [e], e;
-  }
-};
 var __commonJS = (cb, mod) => function __require2() {
   try {
     return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
@@ -41,124 +33,6 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
   isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
   mod
 ));
-
-// node_modules/@actions/core/lib/utils.js
-function toCommandValue(input) {
-  if (input === null || input === void 0) {
-    return "";
-  } else if (typeof input === "string" || input instanceof String) {
-    return input;
-  }
-  return JSON.stringify(input);
-}
-function toCommandProperties(annotationProperties) {
-  if (!Object.keys(annotationProperties).length) {
-    return {};
-  }
-  return {
-    title: annotationProperties.title,
-    file: annotationProperties.file,
-    line: annotationProperties.startLine,
-    endLine: annotationProperties.endLine,
-    col: annotationProperties.startColumn,
-    endColumn: annotationProperties.endColumn
-  };
-}
-var init_utils = __esm({
-  "node_modules/@actions/core/lib/utils.js"() {
-  }
-});
-
-// node_modules/@actions/core/lib/command.js
-import * as os from "os";
-function issueCommand(command, properties, message) {
-  const cmd = new Command(command, properties, message);
-  process.stdout.write(cmd.toString() + os.EOL);
-}
-function escapeData(s) {
-  return toCommandValue(s).replace(/%/g, "%25").replace(/\r/g, "%0D").replace(/\n/g, "%0A");
-}
-function escapeProperty(s) {
-  return toCommandValue(s).replace(/%/g, "%25").replace(/\r/g, "%0D").replace(/\n/g, "%0A").replace(/:/g, "%3A").replace(/,/g, "%2C");
-}
-var CMD_STRING, Command;
-var init_command = __esm({
-  "node_modules/@actions/core/lib/command.js"() {
-    init_utils();
-    CMD_STRING = "::";
-    Command = class {
-      constructor(command, properties, message) {
-        if (!command) {
-          command = "missing.command";
-        }
-        this.command = command;
-        this.properties = properties;
-        this.message = message;
-      }
-      toString() {
-        let cmdStr = CMD_STRING + this.command;
-        if (this.properties && Object.keys(this.properties).length > 0) {
-          cmdStr += " ";
-          let first = true;
-          for (const key in this.properties) {
-            if (this.properties.hasOwnProperty(key)) {
-              const val = this.properties[key];
-              if (val) {
-                if (first) {
-                  first = false;
-                } else {
-                  cmdStr += ",";
-                }
-                cmdStr += `${key}=${escapeProperty(val)}`;
-              }
-            }
-          }
-        }
-        cmdStr += `${CMD_STRING}${escapeData(this.message)}`;
-        return cmdStr;
-      }
-    };
-  }
-});
-
-// node_modules/@actions/core/lib/file-command.js
-import * as crypto from "crypto";
-import * as fs from "fs";
-import * as os2 from "os";
-function issueFileCommand(command, message) {
-  const filePath = process.env[`GITHUB_${command}`];
-  if (!filePath) {
-    throw new Error(`Unable to find environment variable for file command ${command}`);
-  }
-  if (!fs.existsSync(filePath)) {
-    throw new Error(`Missing file at path: ${filePath}`);
-  }
-  fs.appendFileSync(filePath, `${toCommandValue(message)}${os2.EOL}`, {
-    encoding: "utf8"
-  });
-}
-function prepareKeyValueMessage(key, value) {
-  const delimiter2 = `ghadelimiter_${crypto.randomUUID()}`;
-  const convertedValue = toCommandValue(value);
-  if (key.includes(delimiter2)) {
-    throw new Error(`Unexpected input: name should not contain the delimiter "${delimiter2}"`);
-  }
-  if (convertedValue.includes(delimiter2)) {
-    throw new Error(`Unexpected input: value should not contain the delimiter "${delimiter2}"`);
-  }
-  return `${key}<<${delimiter2}${os2.EOL}${convertedValue}${os2.EOL}${delimiter2}`;
-}
-var init_file_command = __esm({
-  "node_modules/@actions/core/lib/file-command.js"() {
-    init_utils();
-  }
-});
-
-// node_modules/@actions/http-client/lib/proxy.js
-var init_proxy = __esm({
-  "node_modules/@actions/http-client/lib/proxy.js"() {
-  }
-});
 
 // node_modules/tunnel/lib/tunnel.js
 var require_tunnel = __commonJS({
@@ -19091,378 +18965,493 @@ var require_undici = __commonJS({
   }
 });
 
+// node_modules/@actions/core/lib/command.js
+import * as os from "os";
+
+// node_modules/@actions/core/lib/utils.js
+function toCommandValue(input) {
+  if (input === null || input === void 0) {
+    return "";
+  } else if (typeof input === "string" || input instanceof String) {
+    return input;
+  }
+  return JSON.stringify(input);
+}
+function toCommandProperties(annotationProperties) {
+  if (!Object.keys(annotationProperties).length) {
+    return {};
+  }
+  return {
+    title: annotationProperties.title,
+    file: annotationProperties.file,
+    line: annotationProperties.startLine,
+    endLine: annotationProperties.endLine,
+    col: annotationProperties.startColumn,
+    endColumn: annotationProperties.endColumn
+  };
+}
+
+// node_modules/@actions/core/lib/command.js
+function issueCommand(command, properties, message) {
+  const cmd = new Command(command, properties, message);
+  process.stdout.write(cmd.toString() + os.EOL);
+}
+var CMD_STRING = "::";
+var Command = class {
+  constructor(command, properties, message) {
+    if (!command) {
+      command = "missing.command";
+    }
+    this.command = command;
+    this.properties = properties;
+    this.message = message;
+  }
+  toString() {
+    let cmdStr = CMD_STRING + this.command;
+    if (this.properties && Object.keys(this.properties).length > 0) {
+      cmdStr += " ";
+      let first = true;
+      for (const key in this.properties) {
+        if (this.properties.hasOwnProperty(key)) {
+          const val = this.properties[key];
+          if (val) {
+            if (first) {
+              first = false;
+            } else {
+              cmdStr += ",";
+            }
+            cmdStr += `${key}=${escapeProperty(val)}`;
+          }
+        }
+      }
+    }
+    cmdStr += `${CMD_STRING}${escapeData(this.message)}`;
+    return cmdStr;
+  }
+};
+function escapeData(s) {
+  return toCommandValue(s).replace(/%/g, "%25").replace(/\r/g, "%0D").replace(/\n/g, "%0A");
+}
+function escapeProperty(s) {
+  return toCommandValue(s).replace(/%/g, "%25").replace(/\r/g, "%0D").replace(/\n/g, "%0A").replace(/:/g, "%3A").replace(/,/g, "%2C");
+}
+
+// node_modules/@actions/core/lib/file-command.js
+import * as crypto from "crypto";
+import * as fs from "fs";
+import * as os2 from "os";
+function issueFileCommand(command, message) {
+  const filePath = process.env[`GITHUB_${command}`];
+  if (!filePath) {
+    throw new Error(`Unable to find environment variable for file command ${command}`);
+  }
+  if (!fs.existsSync(filePath)) {
+    throw new Error(`Missing file at path: ${filePath}`);
+  }
+  fs.appendFileSync(filePath, `${toCommandValue(message)}${os2.EOL}`, {
+    encoding: "utf8"
+  });
+}
+function prepareKeyValueMessage(key, value) {
+  const delimiter2 = `ghadelimiter_${crypto.randomUUID()}`;
+  const convertedValue = toCommandValue(value);
+  if (key.includes(delimiter2)) {
+    throw new Error(`Unexpected input: name should not contain the delimiter "${delimiter2}"`);
+  }
+  if (convertedValue.includes(delimiter2)) {
+    throw new Error(`Unexpected input: value should not contain the delimiter "${delimiter2}"`);
+  }
+  return `${key}<<${delimiter2}${os2.EOL}${convertedValue}${os2.EOL}${delimiter2}`;
+}
+
+// node_modules/@actions/core/lib/core.js
+import * as os5 from "os";
+
 // node_modules/@actions/http-client/lib/index.js
-var tunnel, import_undici, HttpCodes, Headers, MediaTypes, HttpRedirectCodes, HttpResponseRetryCodes;
-var init_lib = __esm({
-  "node_modules/@actions/http-client/lib/index.js"() {
-    init_proxy();
-    tunnel = __toESM(require_tunnel2(), 1);
-    import_undici = __toESM(require_undici(), 1);
-    (function(HttpCodes2) {
-      HttpCodes2[HttpCodes2["OK"] = 200] = "OK";
-      HttpCodes2[HttpCodes2["MultipleChoices"] = 300] = "MultipleChoices";
-      HttpCodes2[HttpCodes2["MovedPermanently"] = 301] = "MovedPermanently";
-      HttpCodes2[HttpCodes2["ResourceMoved"] = 302] = "ResourceMoved";
-      HttpCodes2[HttpCodes2["SeeOther"] = 303] = "SeeOther";
-      HttpCodes2[HttpCodes2["NotModified"] = 304] = "NotModified";
-      HttpCodes2[HttpCodes2["UseProxy"] = 305] = "UseProxy";
-      HttpCodes2[HttpCodes2["SwitchProxy"] = 306] = "SwitchProxy";
-      HttpCodes2[HttpCodes2["TemporaryRedirect"] = 307] = "TemporaryRedirect";
-      HttpCodes2[HttpCodes2["PermanentRedirect"] = 308] = "PermanentRedirect";
-      HttpCodes2[HttpCodes2["BadRequest"] = 400] = "BadRequest";
-      HttpCodes2[HttpCodes2["Unauthorized"] = 401] = "Unauthorized";
-      HttpCodes2[HttpCodes2["PaymentRequired"] = 402] = "PaymentRequired";
-      HttpCodes2[HttpCodes2["Forbidden"] = 403] = "Forbidden";
-      HttpCodes2[HttpCodes2["NotFound"] = 404] = "NotFound";
-      HttpCodes2[HttpCodes2["MethodNotAllowed"] = 405] = "MethodNotAllowed";
-      HttpCodes2[HttpCodes2["NotAcceptable"] = 406] = "NotAcceptable";
-      HttpCodes2[HttpCodes2["ProxyAuthenticationRequired"] = 407] = "ProxyAuthenticationRequired";
-      HttpCodes2[HttpCodes2["RequestTimeout"] = 408] = "RequestTimeout";
-      HttpCodes2[HttpCodes2["Conflict"] = 409] = "Conflict";
-      HttpCodes2[HttpCodes2["Gone"] = 410] = "Gone";
-      HttpCodes2[HttpCodes2["TooManyRequests"] = 429] = "TooManyRequests";
-      HttpCodes2[HttpCodes2["InternalServerError"] = 500] = "InternalServerError";
-      HttpCodes2[HttpCodes2["NotImplemented"] = 501] = "NotImplemented";
-      HttpCodes2[HttpCodes2["BadGateway"] = 502] = "BadGateway";
-      HttpCodes2[HttpCodes2["ServiceUnavailable"] = 503] = "ServiceUnavailable";
-      HttpCodes2[HttpCodes2["GatewayTimeout"] = 504] = "GatewayTimeout";
-    })(HttpCodes || (HttpCodes = {}));
-    (function(Headers2) {
-      Headers2["Accept"] = "accept";
-      Headers2["ContentType"] = "content-type";
-    })(Headers || (Headers = {}));
-    (function(MediaTypes2) {
-      MediaTypes2["ApplicationJson"] = "application/json";
-    })(MediaTypes || (MediaTypes = {}));
-    HttpRedirectCodes = [
-      HttpCodes.MovedPermanently,
-      HttpCodes.ResourceMoved,
-      HttpCodes.SeeOther,
-      HttpCodes.TemporaryRedirect,
-      HttpCodes.PermanentRedirect
-    ];
-    HttpResponseRetryCodes = [
-      HttpCodes.BadGateway,
-      HttpCodes.ServiceUnavailable,
-      HttpCodes.GatewayTimeout
-    ];
-  }
-});
-
-// node_modules/@actions/http-client/lib/auth.js
-var init_auth = __esm({
-  "node_modules/@actions/http-client/lib/auth.js"() {
-  }
-});
-
-// node_modules/@actions/core/lib/oidc-utils.js
-var init_oidc_utils = __esm({
-  "node_modules/@actions/core/lib/oidc-utils.js"() {
-    init_lib();
-    init_auth();
-    init_core();
-  }
-});
+var tunnel = __toESM(require_tunnel2(), 1);
+var import_undici = __toESM(require_undici(), 1);
+var HttpCodes;
+(function(HttpCodes2) {
+  HttpCodes2[HttpCodes2["OK"] = 200] = "OK";
+  HttpCodes2[HttpCodes2["MultipleChoices"] = 300] = "MultipleChoices";
+  HttpCodes2[HttpCodes2["MovedPermanently"] = 301] = "MovedPermanently";
+  HttpCodes2[HttpCodes2["ResourceMoved"] = 302] = "ResourceMoved";
+  HttpCodes2[HttpCodes2["SeeOther"] = 303] = "SeeOther";
+  HttpCodes2[HttpCodes2["NotModified"] = 304] = "NotModified";
+  HttpCodes2[HttpCodes2["UseProxy"] = 305] = "UseProxy";
+  HttpCodes2[HttpCodes2["SwitchProxy"] = 306] = "SwitchProxy";
+  HttpCodes2[HttpCodes2["TemporaryRedirect"] = 307] = "TemporaryRedirect";
+  HttpCodes2[HttpCodes2["PermanentRedirect"] = 308] = "PermanentRedirect";
+  HttpCodes2[HttpCodes2["BadRequest"] = 400] = "BadRequest";
+  HttpCodes2[HttpCodes2["Unauthorized"] = 401] = "Unauthorized";
+  HttpCodes2[HttpCodes2["PaymentRequired"] = 402] = "PaymentRequired";
+  HttpCodes2[HttpCodes2["Forbidden"] = 403] = "Forbidden";
+  HttpCodes2[HttpCodes2["NotFound"] = 404] = "NotFound";
+  HttpCodes2[HttpCodes2["MethodNotAllowed"] = 405] = "MethodNotAllowed";
+  HttpCodes2[HttpCodes2["NotAcceptable"] = 406] = "NotAcceptable";
+  HttpCodes2[HttpCodes2["ProxyAuthenticationRequired"] = 407] = "ProxyAuthenticationRequired";
+  HttpCodes2[HttpCodes2["RequestTimeout"] = 408] = "RequestTimeout";
+  HttpCodes2[HttpCodes2["Conflict"] = 409] = "Conflict";
+  HttpCodes2[HttpCodes2["Gone"] = 410] = "Gone";
+  HttpCodes2[HttpCodes2["TooManyRequests"] = 429] = "TooManyRequests";
+  HttpCodes2[HttpCodes2["InternalServerError"] = 500] = "InternalServerError";
+  HttpCodes2[HttpCodes2["NotImplemented"] = 501] = "NotImplemented";
+  HttpCodes2[HttpCodes2["BadGateway"] = 502] = "BadGateway";
+  HttpCodes2[HttpCodes2["ServiceUnavailable"] = 503] = "ServiceUnavailable";
+  HttpCodes2[HttpCodes2["GatewayTimeout"] = 504] = "GatewayTimeout";
+})(HttpCodes || (HttpCodes = {}));
+var Headers;
+(function(Headers2) {
+  Headers2["Accept"] = "accept";
+  Headers2["ContentType"] = "content-type";
+})(Headers || (Headers = {}));
+var MediaTypes;
+(function(MediaTypes2) {
+  MediaTypes2["ApplicationJson"] = "application/json";
+})(MediaTypes || (MediaTypes = {}));
+var HttpRedirectCodes = [
+  HttpCodes.MovedPermanently,
+  HttpCodes.ResourceMoved,
+  HttpCodes.SeeOther,
+  HttpCodes.TemporaryRedirect,
+  HttpCodes.PermanentRedirect
+];
+var HttpResponseRetryCodes = [
+  HttpCodes.BadGateway,
+  HttpCodes.ServiceUnavailable,
+  HttpCodes.GatewayTimeout
+];
 
 // node_modules/@actions/core/lib/summary.js
 import { EOL as EOL3 } from "os";
 import { constants, promises } from "fs";
-var __awaiter, access, appendFile, writeFile, SUMMARY_ENV_VAR, Summary, _summary, summary;
-var init_summary = __esm({
-  "node_modules/@actions/core/lib/summary.js"() {
-    __awaiter = function(thisArg, _arguments, P, generator) {
-      function adopt(value) {
-        return value instanceof P ? value : new P(function(resolve2) {
-          resolve2(value);
-        });
-      }
-      return new (P || (P = Promise))(function(resolve2, reject) {
-        function fulfilled(value) {
-          try {
-            step(generator.next(value));
-          } catch (e) {
-            reject(e);
-          }
-        }
-        function rejected(value) {
-          try {
-            step(generator["throw"](value));
-          } catch (e) {
-            reject(e);
-          }
-        }
-        function step(result) {
-          result.done ? resolve2(result.value) : adopt(result.value).then(fulfilled, rejected);
-        }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-      });
-    };
-    ({ access, appendFile, writeFile } = promises);
-    SUMMARY_ENV_VAR = "GITHUB_STEP_SUMMARY";
-    Summary = class {
-      constructor() {
-        this._buffer = "";
-      }
-      /**
-       * Finds the summary file path from the environment, rejects if env var is not found or file does not exist
-       * Also checks r/w permissions.
-       *
-       * @returns step summary file path
-       */
-      filePath() {
-        return __awaiter(this, void 0, void 0, function* () {
-          if (this._filePath) {
-            return this._filePath;
-          }
-          const pathFromEnv = process.env[SUMMARY_ENV_VAR];
-          if (!pathFromEnv) {
-            throw new Error(`Unable to find environment variable for $${SUMMARY_ENV_VAR}. Check if your runtime environment supports job summaries.`);
-          }
-          try {
-            yield access(pathFromEnv, constants.R_OK | constants.W_OK);
-          } catch (_a) {
-            throw new Error(`Unable to access summary file: '${pathFromEnv}'. Check if the file has correct read/write permissions.`);
-          }
-          this._filePath = pathFromEnv;
-          return this._filePath;
-        });
-      }
-      /**
-       * Wraps content in an HTML tag, adding any HTML attributes
-       *
-       * @param {string} tag HTML tag to wrap
-       * @param {string | null} content content within the tag
-       * @param {[attribute: string]: string} attrs key-value list of HTML attributes to add
-       *
-       * @returns {string} content wrapped in HTML element
-       */
-      wrap(tag, content, attrs = {}) {
-        const htmlAttrs = Object.entries(attrs).map(([key, value]) => ` ${key}="${value}"`).join("");
-        if (!content) {
-          return `<${tag}${htmlAttrs}>`;
-        }
-        return `<${tag}${htmlAttrs}>${content}</${tag}>`;
-      }
-      /**
-       * Writes text in the buffer to the summary buffer file and empties buffer. Will append by default.
-       *
-       * @param {SummaryWriteOptions} [options] (optional) options for write operation
-       *
-       * @returns {Promise<Summary>} summary instance
-       */
-      write(options) {
-        return __awaiter(this, void 0, void 0, function* () {
-          const overwrite = !!(options === null || options === void 0 ? void 0 : options.overwrite);
-          const filePath = yield this.filePath();
-          const writeFunc = overwrite ? writeFile : appendFile;
-          yield writeFunc(filePath, this._buffer, { encoding: "utf8" });
-          return this.emptyBuffer();
-        });
-      }
-      /**
-       * Clears the summary buffer and wipes the summary file
-       *
-       * @returns {Summary} summary instance
-       */
-      clear() {
-        return __awaiter(this, void 0, void 0, function* () {
-          return this.emptyBuffer().write({ overwrite: true });
-        });
-      }
-      /**
-       * Returns the current summary buffer as a string
-       *
-       * @returns {string} string of summary buffer
-       */
-      stringify() {
-        return this._buffer;
-      }
-      /**
-       * If the summary buffer is empty
-       *
-       * @returns {boolen} true if the buffer is empty
-       */
-      isEmptyBuffer() {
-        return this._buffer.length === 0;
-      }
-      /**
-       * Resets the summary buffer without writing to summary file
-       *
-       * @returns {Summary} summary instance
-       */
-      emptyBuffer() {
-        this._buffer = "";
-        return this;
-      }
-      /**
-       * Adds raw text to the summary buffer
-       *
-       * @param {string} text content to add
-       * @param {boolean} [addEOL=false] (optional) append an EOL to the raw text (default: false)
-       *
-       * @returns {Summary} summary instance
-       */
-      addRaw(text, addEOL = false) {
-        this._buffer += text;
-        return addEOL ? this.addEOL() : this;
-      }
-      /**
-       * Adds the operating system-specific end-of-line marker to the buffer
-       *
-       * @returns {Summary} summary instance
-       */
-      addEOL() {
-        return this.addRaw(EOL3);
-      }
-      /**
-       * Adds an HTML codeblock to the summary buffer
-       *
-       * @param {string} code content to render within fenced code block
-       * @param {string} lang (optional) language to syntax highlight code
-       *
-       * @returns {Summary} summary instance
-       */
-      addCodeBlock(code, lang) {
-        const attrs = Object.assign({}, lang && { lang });
-        const element = this.wrap("pre", this.wrap("code", code), attrs);
-        return this.addRaw(element).addEOL();
-      }
-      /**
-       * Adds an HTML list to the summary buffer
-       *
-       * @param {string[]} items list of items to render
-       * @param {boolean} [ordered=false] (optional) if the rendered list should be ordered or not (default: false)
-       *
-       * @returns {Summary} summary instance
-       */
-      addList(items, ordered = false) {
-        const tag = ordered ? "ol" : "ul";
-        const listItems = items.map((item) => this.wrap("li", item)).join("");
-        const element = this.wrap(tag, listItems);
-        return this.addRaw(element).addEOL();
-      }
-      /**
-       * Adds an HTML table to the summary buffer
-       *
-       * @param {SummaryTableCell[]} rows table rows
-       *
-       * @returns {Summary} summary instance
-       */
-      addTable(rows) {
-        const tableBody = rows.map((row) => {
-          const cells = row.map((cell) => {
-            if (typeof cell === "string") {
-              return this.wrap("td", cell);
-            }
-            const { header, data, colspan, rowspan } = cell;
-            const tag = header ? "th" : "td";
-            const attrs = Object.assign(Object.assign({}, colspan && { colspan }), rowspan && { rowspan });
-            return this.wrap(tag, data, attrs);
-          }).join("");
-          return this.wrap("tr", cells);
-        }).join("");
-        const element = this.wrap("table", tableBody);
-        return this.addRaw(element).addEOL();
-      }
-      /**
-       * Adds a collapsable HTML details element to the summary buffer
-       *
-       * @param {string} label text for the closed state
-       * @param {string} content collapsable content
-       *
-       * @returns {Summary} summary instance
-       */
-      addDetails(label, content) {
-        const element = this.wrap("details", this.wrap("summary", label) + content);
-        return this.addRaw(element).addEOL();
-      }
-      /**
-       * Adds an HTML image tag to the summary buffer
-       *
-       * @param {string} src path to the image you to embed
-       * @param {string} alt text description of the image
-       * @param {SummaryImageOptions} options (optional) addition image attributes
-       *
-       * @returns {Summary} summary instance
-       */
-      addImage(src, alt, options) {
-        const { width, height } = options || {};
-        const attrs = Object.assign(Object.assign({}, width && { width }), height && { height });
-        const element = this.wrap("img", null, Object.assign({ src, alt }, attrs));
-        return this.addRaw(element).addEOL();
-      }
-      /**
-       * Adds an HTML section heading element
-       *
-       * @param {string} text heading text
-       * @param {number | string} [level=1] (optional) the heading level, default: 1
-       *
-       * @returns {Summary} summary instance
-       */
-      addHeading(text, level) {
-        const tag = `h${level}`;
-        const allowedTag = ["h1", "h2", "h3", "h4", "h5", "h6"].includes(tag) ? tag : "h1";
-        const element = this.wrap(allowedTag, text);
-        return this.addRaw(element).addEOL();
-      }
-      /**
-       * Adds an HTML thematic break (<hr>) to the summary buffer
-       *
-       * @returns {Summary} summary instance
-       */
-      addSeparator() {
-        const element = this.wrap("hr", null);
-        return this.addRaw(element).addEOL();
-      }
-      /**
-       * Adds an HTML line break (<br>) to the summary buffer
-       *
-       * @returns {Summary} summary instance
-       */
-      addBreak() {
-        const element = this.wrap("br", null);
-        return this.addRaw(element).addEOL();
-      }
-      /**
-       * Adds an HTML blockquote to the summary buffer
-       *
-       * @param {string} text quote text
-       * @param {string} cite (optional) citation url
-       *
-       * @returns {Summary} summary instance
-       */
-      addQuote(text, cite) {
-        const attrs = Object.assign({}, cite && { cite });
-        const element = this.wrap("blockquote", text, attrs);
-        return this.addRaw(element).addEOL();
-      }
-      /**
-       * Adds an HTML anchor tag to the summary buffer
-       *
-       * @param {string} text link text/content
-       * @param {string} href hyperlink
-       *
-       * @returns {Summary} summary instance
-       */
-      addLink(text, href) {
-        const element = this.wrap("a", text, { href });
-        return this.addRaw(element).addEOL();
-      }
-    };
-    _summary = new Summary();
-    summary = _summary;
+var __awaiter = function(thisArg, _arguments, P, generator) {
+  function adopt(value) {
+    return value instanceof P ? value : new P(function(resolve2) {
+      resolve2(value);
+    });
   }
-});
+  return new (P || (P = Promise))(function(resolve2, reject) {
+    function fulfilled(value) {
+      try {
+        step(generator.next(value));
+      } catch (e) {
+        reject(e);
+      }
+    }
+    function rejected(value) {
+      try {
+        step(generator["throw"](value));
+      } catch (e) {
+        reject(e);
+      }
+    }
+    function step(result) {
+      result.done ? resolve2(result.value) : adopt(result.value).then(fulfilled, rejected);
+    }
+    step((generator = generator.apply(thisArg, _arguments || [])).next());
+  });
+};
+var { access, appendFile, writeFile } = promises;
+var SUMMARY_ENV_VAR = "GITHUB_STEP_SUMMARY";
+var Summary = class {
+  constructor() {
+    this._buffer = "";
+  }
+  /**
+   * Finds the summary file path from the environment, rejects if env var is not found or file does not exist
+   * Also checks r/w permissions.
+   *
+   * @returns step summary file path
+   */
+  filePath() {
+    return __awaiter(this, void 0, void 0, function* () {
+      if (this._filePath) {
+        return this._filePath;
+      }
+      const pathFromEnv = process.env[SUMMARY_ENV_VAR];
+      if (!pathFromEnv) {
+        throw new Error(`Unable to find environment variable for $${SUMMARY_ENV_VAR}. Check if your runtime environment supports job summaries.`);
+      }
+      try {
+        yield access(pathFromEnv, constants.R_OK | constants.W_OK);
+      } catch (_a) {
+        throw new Error(`Unable to access summary file: '${pathFromEnv}'. Check if the file has correct read/write permissions.`);
+      }
+      this._filePath = pathFromEnv;
+      return this._filePath;
+    });
+  }
+  /**
+   * Wraps content in an HTML tag, adding any HTML attributes
+   *
+   * @param {string} tag HTML tag to wrap
+   * @param {string | null} content content within the tag
+   * @param {[attribute: string]: string} attrs key-value list of HTML attributes to add
+   *
+   * @returns {string} content wrapped in HTML element
+   */
+  wrap(tag, content, attrs = {}) {
+    const htmlAttrs = Object.entries(attrs).map(([key, value]) => ` ${key}="${value}"`).join("");
+    if (!content) {
+      return `<${tag}${htmlAttrs}>`;
+    }
+    return `<${tag}${htmlAttrs}>${content}</${tag}>`;
+  }
+  /**
+   * Writes text in the buffer to the summary buffer file and empties buffer. Will append by default.
+   *
+   * @param {SummaryWriteOptions} [options] (optional) options for write operation
+   *
+   * @returns {Promise<Summary>} summary instance
+   */
+  write(options) {
+    return __awaiter(this, void 0, void 0, function* () {
+      const overwrite = !!(options === null || options === void 0 ? void 0 : options.overwrite);
+      const filePath = yield this.filePath();
+      const writeFunc = overwrite ? writeFile : appendFile;
+      yield writeFunc(filePath, this._buffer, { encoding: "utf8" });
+      return this.emptyBuffer();
+    });
+  }
+  /**
+   * Clears the summary buffer and wipes the summary file
+   *
+   * @returns {Summary} summary instance
+   */
+  clear() {
+    return __awaiter(this, void 0, void 0, function* () {
+      return this.emptyBuffer().write({ overwrite: true });
+    });
+  }
+  /**
+   * Returns the current summary buffer as a string
+   *
+   * @returns {string} string of summary buffer
+   */
+  stringify() {
+    return this._buffer;
+  }
+  /**
+   * If the summary buffer is empty
+   *
+   * @returns {boolen} true if the buffer is empty
+   */
+  isEmptyBuffer() {
+    return this._buffer.length === 0;
+  }
+  /**
+   * Resets the summary buffer without writing to summary file
+   *
+   * @returns {Summary} summary instance
+   */
+  emptyBuffer() {
+    this._buffer = "";
+    return this;
+  }
+  /**
+   * Adds raw text to the summary buffer
+   *
+   * @param {string} text content to add
+   * @param {boolean} [addEOL=false] (optional) append an EOL to the raw text (default: false)
+   *
+   * @returns {Summary} summary instance
+   */
+  addRaw(text, addEOL = false) {
+    this._buffer += text;
+    return addEOL ? this.addEOL() : this;
+  }
+  /**
+   * Adds the operating system-specific end-of-line marker to the buffer
+   *
+   * @returns {Summary} summary instance
+   */
+  addEOL() {
+    return this.addRaw(EOL3);
+  }
+  /**
+   * Adds an HTML codeblock to the summary buffer
+   *
+   * @param {string} code content to render within fenced code block
+   * @param {string} lang (optional) language to syntax highlight code
+   *
+   * @returns {Summary} summary instance
+   */
+  addCodeBlock(code, lang) {
+    const attrs = Object.assign({}, lang && { lang });
+    const element = this.wrap("pre", this.wrap("code", code), attrs);
+    return this.addRaw(element).addEOL();
+  }
+  /**
+   * Adds an HTML list to the summary buffer
+   *
+   * @param {string[]} items list of items to render
+   * @param {boolean} [ordered=false] (optional) if the rendered list should be ordered or not (default: false)
+   *
+   * @returns {Summary} summary instance
+   */
+  addList(items, ordered = false) {
+    const tag = ordered ? "ol" : "ul";
+    const listItems = items.map((item) => this.wrap("li", item)).join("");
+    const element = this.wrap(tag, listItems);
+    return this.addRaw(element).addEOL();
+  }
+  /**
+   * Adds an HTML table to the summary buffer
+   *
+   * @param {SummaryTableCell[]} rows table rows
+   *
+   * @returns {Summary} summary instance
+   */
+  addTable(rows) {
+    const tableBody = rows.map((row) => {
+      const cells = row.map((cell) => {
+        if (typeof cell === "string") {
+          return this.wrap("td", cell);
+        }
+        const { header, data, colspan, rowspan } = cell;
+        const tag = header ? "th" : "td";
+        const attrs = Object.assign(Object.assign({}, colspan && { colspan }), rowspan && { rowspan });
+        return this.wrap(tag, data, attrs);
+      }).join("");
+      return this.wrap("tr", cells);
+    }).join("");
+    const element = this.wrap("table", tableBody);
+    return this.addRaw(element).addEOL();
+  }
+  /**
+   * Adds a collapsable HTML details element to the summary buffer
+   *
+   * @param {string} label text for the closed state
+   * @param {string} content collapsable content
+   *
+   * @returns {Summary} summary instance
+   */
+  addDetails(label, content) {
+    const element = this.wrap("details", this.wrap("summary", label) + content);
+    return this.addRaw(element).addEOL();
+  }
+  /**
+   * Adds an HTML image tag to the summary buffer
+   *
+   * @param {string} src path to the image you to embed
+   * @param {string} alt text description of the image
+   * @param {SummaryImageOptions} options (optional) addition image attributes
+   *
+   * @returns {Summary} summary instance
+   */
+  addImage(src, alt, options) {
+    const { width, height } = options || {};
+    const attrs = Object.assign(Object.assign({}, width && { width }), height && { height });
+    const element = this.wrap("img", null, Object.assign({ src, alt }, attrs));
+    return this.addRaw(element).addEOL();
+  }
+  /**
+   * Adds an HTML section heading element
+   *
+   * @param {string} text heading text
+   * @param {number | string} [level=1] (optional) the heading level, default: 1
+   *
+   * @returns {Summary} summary instance
+   */
+  addHeading(text, level) {
+    const tag = `h${level}`;
+    const allowedTag = ["h1", "h2", "h3", "h4", "h5", "h6"].includes(tag) ? tag : "h1";
+    const element = this.wrap(allowedTag, text);
+    return this.addRaw(element).addEOL();
+  }
+  /**
+   * Adds an HTML thematic break (<hr>) to the summary buffer
+   *
+   * @returns {Summary} summary instance
+   */
+  addSeparator() {
+    const element = this.wrap("hr", null);
+    return this.addRaw(element).addEOL();
+  }
+  /**
+   * Adds an HTML line break (<br>) to the summary buffer
+   *
+   * @returns {Summary} summary instance
+   */
+  addBreak() {
+    const element = this.wrap("br", null);
+    return this.addRaw(element).addEOL();
+  }
+  /**
+   * Adds an HTML blockquote to the summary buffer
+   *
+   * @param {string} text quote text
+   * @param {string} cite (optional) citation url
+   *
+   * @returns {Summary} summary instance
+   */
+  addQuote(text, cite) {
+    const attrs = Object.assign({}, cite && { cite });
+    const element = this.wrap("blockquote", text, attrs);
+    return this.addRaw(element).addEOL();
+  }
+  /**
+   * Adds an HTML anchor tag to the summary buffer
+   *
+   * @param {string} text link text/content
+   * @param {string} href hyperlink
+   *
+   * @returns {Summary} summary instance
+   */
+  addLink(text, href) {
+    const element = this.wrap("a", text, { href });
+    return this.addRaw(element).addEOL();
+  }
+};
+var _summary = new Summary();
+var summary = _summary;
 
-// node_modules/@actions/core/lib/path-utils.js
-var init_path_utils = __esm({
-  "node_modules/@actions/core/lib/path-utils.js"() {
-  }
-});
+// node_modules/@actions/core/lib/platform.js
+import os4 from "os";
+
+// node_modules/@actions/exec/lib/toolrunner.js
+import * as os3 from "os";
+import * as events from "events";
+import * as child from "child_process";
+import * as path3 from "path";
+
+// node_modules/@actions/io/lib/io.js
+import * as path2 from "path";
 
 // node_modules/@actions/io/lib/io-util.js
 import * as fs2 from "fs";
 import * as path from "path";
+var __awaiter2 = function(thisArg, _arguments, P, generator) {
+  function adopt(value) {
+    return value instanceof P ? value : new P(function(resolve2) {
+      resolve2(value);
+    });
+  }
+  return new (P || (P = Promise))(function(resolve2, reject) {
+    function fulfilled(value) {
+      try {
+        step(generator.next(value));
+      } catch (e) {
+        reject(e);
+      }
+    }
+    function rejected(value) {
+      try {
+        step(generator["throw"](value));
+      } catch (e) {
+        reject(e);
+      }
+    }
+    function step(result) {
+      result.done ? resolve2(result.value) : adopt(result.value).then(fulfilled, rejected);
+    }
+    step((generator = generator.apply(thisArg, _arguments || [])).next());
+  });
+};
+var { chmod, copyFile, lstat, mkdir, open, readdir, rename, rm, rmdir, stat, symlink, unlink } = fs2.promises;
+var IS_WINDOWS = process.platform === "win32";
+var READONLY = fs2.constants.O_RDONLY;
 function exists(fsPath) {
   return __awaiter2(this, void 0, void 0, function* () {
     try {
@@ -19555,44 +19544,35 @@ function normalizeSeparators(p) {
 function isUnixExecutable(stats) {
   return (stats.mode & 1) > 0 || (stats.mode & 8) > 0 && process.getgid !== void 0 && stats.gid === process.getgid() || (stats.mode & 64) > 0 && process.getuid !== void 0 && stats.uid === process.getuid();
 }
-var __awaiter2, chmod, copyFile, lstat, mkdir, open, readdir, rename, rm, rmdir, stat, symlink, unlink, IS_WINDOWS, READONLY;
-var init_io_util = __esm({
-  "node_modules/@actions/io/lib/io-util.js"() {
-    __awaiter2 = function(thisArg, _arguments, P, generator) {
-      function adopt(value) {
-        return value instanceof P ? value : new P(function(resolve2) {
-          resolve2(value);
-        });
-      }
-      return new (P || (P = Promise))(function(resolve2, reject) {
-        function fulfilled(value) {
-          try {
-            step(generator.next(value));
-          } catch (e) {
-            reject(e);
-          }
-        }
-        function rejected(value) {
-          try {
-            step(generator["throw"](value));
-          } catch (e) {
-            reject(e);
-          }
-        }
-        function step(result) {
-          result.done ? resolve2(result.value) : adopt(result.value).then(fulfilled, rejected);
-        }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-      });
-    };
-    ({ chmod, copyFile, lstat, mkdir, open, readdir, rename, rm, rmdir, stat, symlink, unlink } = fs2.promises);
-    IS_WINDOWS = process.platform === "win32";
-    READONLY = fs2.constants.O_RDONLY;
-  }
-});
 
 // node_modules/@actions/io/lib/io.js
-import * as path2 from "path";
+var __awaiter3 = function(thisArg, _arguments, P, generator) {
+  function adopt(value) {
+    return value instanceof P ? value : new P(function(resolve2) {
+      resolve2(value);
+    });
+  }
+  return new (P || (P = Promise))(function(resolve2, reject) {
+    function fulfilled(value) {
+      try {
+        step(generator.next(value));
+      } catch (e) {
+        reject(e);
+      }
+    }
+    function rejected(value) {
+      try {
+        step(generator["throw"](value));
+      } catch (e) {
+        reject(e);
+      }
+    }
+    function step(result) {
+      result.done ? resolve2(result.value) : adopt(result.value).then(fulfilled, rejected);
+    }
+    step((generator = generator.apply(thisArg, _arguments || [])).next());
+  });
+};
 function which(tool, check) {
   return __awaiter3(this, void 0, void 0, function* () {
     if (!tool) {
@@ -19657,46 +19637,346 @@ function findInPath(tool) {
     return matches;
   });
 }
-var __awaiter3;
-var init_io = __esm({
-  "node_modules/@actions/io/lib/io.js"() {
-    init_io_util();
-    __awaiter3 = function(thisArg, _arguments, P, generator) {
-      function adopt(value) {
-        return value instanceof P ? value : new P(function(resolve2) {
-          resolve2(value);
-        });
-      }
-      return new (P || (P = Promise))(function(resolve2, reject) {
-        function fulfilled(value) {
-          try {
-            step(generator.next(value));
-          } catch (e) {
-            reject(e);
-          }
-        }
-        function rejected(value) {
-          try {
-            step(generator["throw"](value));
-          } catch (e) {
-            reject(e);
-          }
-        }
-        function step(result) {
-          result.done ? resolve2(result.value) : adopt(result.value).then(fulfilled, rejected);
-        }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-      });
-    };
-  }
-});
 
 // node_modules/@actions/exec/lib/toolrunner.js
-import * as os3 from "os";
-import * as events from "events";
-import * as child from "child_process";
-import * as path3 from "path";
 import { setTimeout as setTimeout2 } from "timers";
+var __awaiter4 = function(thisArg, _arguments, P, generator) {
+  function adopt(value) {
+    return value instanceof P ? value : new P(function(resolve2) {
+      resolve2(value);
+    });
+  }
+  return new (P || (P = Promise))(function(resolve2, reject) {
+    function fulfilled(value) {
+      try {
+        step(generator.next(value));
+      } catch (e) {
+        reject(e);
+      }
+    }
+    function rejected(value) {
+      try {
+        step(generator["throw"](value));
+      } catch (e) {
+        reject(e);
+      }
+    }
+    function step(result) {
+      result.done ? resolve2(result.value) : adopt(result.value).then(fulfilled, rejected);
+    }
+    step((generator = generator.apply(thisArg, _arguments || [])).next());
+  });
+};
+var IS_WINDOWS2 = process.platform === "win32";
+var ToolRunner = class extends events.EventEmitter {
+  constructor(toolPath, args, options) {
+    super();
+    if (!toolPath) {
+      throw new Error("Parameter 'toolPath' cannot be null or empty.");
+    }
+    this.toolPath = toolPath;
+    this.args = args || [];
+    this.options = options || {};
+  }
+  _debug(message) {
+    if (this.options.listeners && this.options.listeners.debug) {
+      this.options.listeners.debug(message);
+    }
+  }
+  _getCommandString(options, noPrefix) {
+    const toolPath = this._getSpawnFileName();
+    const args = this._getSpawnArgs(options);
+    let cmd = noPrefix ? "" : "[command]";
+    if (IS_WINDOWS2) {
+      if (this._isCmdFile()) {
+        cmd += toolPath;
+        for (const a of args) {
+          cmd += ` ${a}`;
+        }
+      } else if (options.windowsVerbatimArguments) {
+        cmd += `"${toolPath}"`;
+        for (const a of args) {
+          cmd += ` ${a}`;
+        }
+      } else {
+        cmd += this._windowsQuoteCmdArg(toolPath);
+        for (const a of args) {
+          cmd += ` ${this._windowsQuoteCmdArg(a)}`;
+        }
+      }
+    } else {
+      cmd += toolPath;
+      for (const a of args) {
+        cmd += ` ${a}`;
+      }
+    }
+    return cmd;
+  }
+  _processLineBuffer(data, strBuffer, onLine) {
+    try {
+      let s = strBuffer + data.toString();
+      let n = s.indexOf(os3.EOL);
+      while (n > -1) {
+        const line = s.substring(0, n);
+        onLine(line);
+        s = s.substring(n + os3.EOL.length);
+        n = s.indexOf(os3.EOL);
+      }
+      return s;
+    } catch (err) {
+      this._debug(`error processing line. Failed with error ${err}`);
+      return "";
+    }
+  }
+  _getSpawnFileName() {
+    if (IS_WINDOWS2) {
+      if (this._isCmdFile()) {
+        return process.env["COMSPEC"] || "cmd.exe";
+      }
+    }
+    return this.toolPath;
+  }
+  _getSpawnArgs(options) {
+    if (IS_WINDOWS2) {
+      if (this._isCmdFile()) {
+        let argline = `/D /S /C "${this._windowsQuoteCmdArg(this.toolPath)}`;
+        for (const a of this.args) {
+          argline += " ";
+          argline += options.windowsVerbatimArguments ? a : this._windowsQuoteCmdArg(a);
+        }
+        argline += '"';
+        return [argline];
+      }
+    }
+    return this.args;
+  }
+  _endsWith(str, end) {
+    return str.endsWith(end);
+  }
+  _isCmdFile() {
+    const upperToolPath = this.toolPath.toUpperCase();
+    return this._endsWith(upperToolPath, ".CMD") || this._endsWith(upperToolPath, ".BAT");
+  }
+  _windowsQuoteCmdArg(arg) {
+    if (!this._isCmdFile()) {
+      return this._uvQuoteCmdArg(arg);
+    }
+    if (!arg) {
+      return '""';
+    }
+    const cmdSpecialChars = [
+      " ",
+      "	",
+      "&",
+      "(",
+      ")",
+      "[",
+      "]",
+      "{",
+      "}",
+      "^",
+      "=",
+      ";",
+      "!",
+      "'",
+      "+",
+      ",",
+      "`",
+      "~",
+      "|",
+      "<",
+      ">",
+      '"'
+    ];
+    let needsQuotes = false;
+    for (const char of arg) {
+      if (cmdSpecialChars.some((x) => x === char)) {
+        needsQuotes = true;
+        break;
+      }
+    }
+    if (!needsQuotes) {
+      return arg;
+    }
+    let reverse = '"';
+    let quoteHit = true;
+    for (let i = arg.length; i > 0; i--) {
+      reverse += arg[i - 1];
+      if (quoteHit && arg[i - 1] === "\\") {
+        reverse += "\\";
+      } else if (arg[i - 1] === '"') {
+        quoteHit = true;
+        reverse += '"';
+      } else {
+        quoteHit = false;
+      }
+    }
+    reverse += '"';
+    return reverse.split("").reverse().join("");
+  }
+  _uvQuoteCmdArg(arg) {
+    if (!arg) {
+      return '""';
+    }
+    if (!arg.includes(" ") && !arg.includes("	") && !arg.includes('"')) {
+      return arg;
+    }
+    if (!arg.includes('"') && !arg.includes("\\")) {
+      return `"${arg}"`;
+    }
+    let reverse = '"';
+    let quoteHit = true;
+    for (let i = arg.length; i > 0; i--) {
+      reverse += arg[i - 1];
+      if (quoteHit && arg[i - 1] === "\\") {
+        reverse += "\\";
+      } else if (arg[i - 1] === '"') {
+        quoteHit = true;
+        reverse += "\\";
+      } else {
+        quoteHit = false;
+      }
+    }
+    reverse += '"';
+    return reverse.split("").reverse().join("");
+  }
+  _cloneExecOptions(options) {
+    options = options || {};
+    const result = {
+      cwd: options.cwd || process.cwd(),
+      env: options.env || process.env,
+      silent: options.silent || false,
+      windowsVerbatimArguments: options.windowsVerbatimArguments || false,
+      failOnStdErr: options.failOnStdErr || false,
+      ignoreReturnCode: options.ignoreReturnCode || false,
+      delay: options.delay || 1e4
+    };
+    result.outStream = options.outStream || process.stdout;
+    result.errStream = options.errStream || process.stderr;
+    return result;
+  }
+  _getSpawnOptions(options, toolPath) {
+    options = options || {};
+    const result = {};
+    result.cwd = options.cwd;
+    result.env = options.env;
+    result["windowsVerbatimArguments"] = options.windowsVerbatimArguments || this._isCmdFile();
+    if (options.windowsVerbatimArguments) {
+      result.argv0 = `"${toolPath}"`;
+    }
+    return result;
+  }
+  /**
+   * Exec a tool.
+   * Output will be streamed to the live console.
+   * Returns promise with return code
+   *
+   * @param     tool     path to tool to exec
+   * @param     options  optional exec options.  See ExecOptions
+   * @returns   number
+   */
+  exec() {
+    return __awaiter4(this, void 0, void 0, function* () {
+      if (!isRooted(this.toolPath) && (this.toolPath.includes("/") || IS_WINDOWS2 && this.toolPath.includes("\\"))) {
+        this.toolPath = path3.resolve(process.cwd(), this.options.cwd || process.cwd(), this.toolPath);
+      }
+      this.toolPath = yield which(this.toolPath, true);
+      return new Promise((resolve2, reject) => __awaiter4(this, void 0, void 0, function* () {
+        this._debug(`exec tool: ${this.toolPath}`);
+        this._debug("arguments:");
+        for (const arg of this.args) {
+          this._debug(`   ${arg}`);
+        }
+        const optionsNonNull = this._cloneExecOptions(this.options);
+        if (!optionsNonNull.silent && optionsNonNull.outStream) {
+          optionsNonNull.outStream.write(this._getCommandString(optionsNonNull) + os3.EOL);
+        }
+        const state = new ExecState(optionsNonNull, this.toolPath);
+        state.on("debug", (message) => {
+          this._debug(message);
+        });
+        if (this.options.cwd && !(yield exists(this.options.cwd))) {
+          return reject(new Error(`The cwd: ${this.options.cwd} does not exist!`));
+        }
+        const fileName = this._getSpawnFileName();
+        const cp = child.spawn(fileName, this._getSpawnArgs(optionsNonNull), this._getSpawnOptions(this.options, fileName));
+        let stdbuffer = "";
+        if (cp.stdout) {
+          cp.stdout.on("data", (data) => {
+            if (this.options.listeners && this.options.listeners.stdout) {
+              this.options.listeners.stdout(data);
+            }
+            if (!optionsNonNull.silent && optionsNonNull.outStream) {
+              optionsNonNull.outStream.write(data);
+            }
+            stdbuffer = this._processLineBuffer(data, stdbuffer, (line) => {
+              if (this.options.listeners && this.options.listeners.stdline) {
+                this.options.listeners.stdline(line);
+              }
+            });
+          });
+        }
+        let errbuffer = "";
+        if (cp.stderr) {
+          cp.stderr.on("data", (data) => {
+            state.processStderr = true;
+            if (this.options.listeners && this.options.listeners.stderr) {
+              this.options.listeners.stderr(data);
+            }
+            if (!optionsNonNull.silent && optionsNonNull.errStream && optionsNonNull.outStream) {
+              const s = optionsNonNull.failOnStdErr ? optionsNonNull.errStream : optionsNonNull.outStream;
+              s.write(data);
+            }
+            errbuffer = this._processLineBuffer(data, errbuffer, (line) => {
+              if (this.options.listeners && this.options.listeners.errline) {
+                this.options.listeners.errline(line);
+              }
+            });
+          });
+        }
+        cp.on("error", (err) => {
+          state.processError = err.message;
+          state.processExited = true;
+          state.processClosed = true;
+          state.CheckComplete();
+        });
+        cp.on("exit", (code) => {
+          state.processExitCode = code;
+          state.processExited = true;
+          this._debug(`Exit code ${code} received from tool '${this.toolPath}'`);
+          state.CheckComplete();
+        });
+        cp.on("close", (code) => {
+          state.processExitCode = code;
+          state.processExited = true;
+          state.processClosed = true;
+          this._debug(`STDIO streams have closed for tool '${this.toolPath}'`);
+          state.CheckComplete();
+        });
+        state.on("done", (error2, exitCode) => {
+          if (stdbuffer.length > 0) {
+            this.emit("stdline", stdbuffer);
+          }
+          if (errbuffer.length > 0) {
+            this.emit("errline", errbuffer);
+          }
+          cp.removeAllListeners();
+          if (error2) {
+            reject(error2);
+          } else {
+            resolve2(exitCode);
+          }
+        });
+        if (this.options.input) {
+          if (!cp.stdin) {
+            throw new Error("child process missing stdin");
+          }
+          cp.stdin.end(this.options.input);
+        }
+      }));
+    });
+  }
+};
 function argStringToArray(argString) {
   const args = [];
   let inQuotes = false;
@@ -19741,414 +20021,97 @@ function argStringToArray(argString) {
   }
   return args;
 }
-var __awaiter4, IS_WINDOWS2, ToolRunner, ExecState;
-var init_toolrunner = __esm({
-  "node_modules/@actions/exec/lib/toolrunner.js"() {
-    init_io();
-    init_io_util();
-    __awaiter4 = function(thisArg, _arguments, P, generator) {
-      function adopt(value) {
-        return value instanceof P ? value : new P(function(resolve2) {
-          resolve2(value);
-        });
-      }
-      return new (P || (P = Promise))(function(resolve2, reject) {
-        function fulfilled(value) {
-          try {
-            step(generator.next(value));
-          } catch (e) {
-            reject(e);
-          }
-        }
-        function rejected(value) {
-          try {
-            step(generator["throw"](value));
-          } catch (e) {
-            reject(e);
-          }
-        }
-        function step(result) {
-          result.done ? resolve2(result.value) : adopt(result.value).then(fulfilled, rejected);
-        }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-      });
-    };
-    IS_WINDOWS2 = process.platform === "win32";
-    ToolRunner = class extends events.EventEmitter {
-      constructor(toolPath, args, options) {
-        super();
-        if (!toolPath) {
-          throw new Error("Parameter 'toolPath' cannot be null or empty.");
-        }
-        this.toolPath = toolPath;
-        this.args = args || [];
-        this.options = options || {};
-      }
-      _debug(message) {
-        if (this.options.listeners && this.options.listeners.debug) {
-          this.options.listeners.debug(message);
-        }
-      }
-      _getCommandString(options, noPrefix) {
-        const toolPath = this._getSpawnFileName();
-        const args = this._getSpawnArgs(options);
-        let cmd = noPrefix ? "" : "[command]";
-        if (IS_WINDOWS2) {
-          if (this._isCmdFile()) {
-            cmd += toolPath;
-            for (const a of args) {
-              cmd += ` ${a}`;
-            }
-          } else if (options.windowsVerbatimArguments) {
-            cmd += `"${toolPath}"`;
-            for (const a of args) {
-              cmd += ` ${a}`;
-            }
-          } else {
-            cmd += this._windowsQuoteCmdArg(toolPath);
-            for (const a of args) {
-              cmd += ` ${this._windowsQuoteCmdArg(a)}`;
-            }
-          }
-        } else {
-          cmd += toolPath;
-          for (const a of args) {
-            cmd += ` ${a}`;
-          }
-        }
-        return cmd;
-      }
-      _processLineBuffer(data, strBuffer, onLine) {
-        try {
-          let s = strBuffer + data.toString();
-          let n = s.indexOf(os3.EOL);
-          while (n > -1) {
-            const line = s.substring(0, n);
-            onLine(line);
-            s = s.substring(n + os3.EOL.length);
-            n = s.indexOf(os3.EOL);
-          }
-          return s;
-        } catch (err) {
-          this._debug(`error processing line. Failed with error ${err}`);
-          return "";
-        }
-      }
-      _getSpawnFileName() {
-        if (IS_WINDOWS2) {
-          if (this._isCmdFile()) {
-            return process.env["COMSPEC"] || "cmd.exe";
-          }
-        }
-        return this.toolPath;
-      }
-      _getSpawnArgs(options) {
-        if (IS_WINDOWS2) {
-          if (this._isCmdFile()) {
-            let argline = `/D /S /C "${this._windowsQuoteCmdArg(this.toolPath)}`;
-            for (const a of this.args) {
-              argline += " ";
-              argline += options.windowsVerbatimArguments ? a : this._windowsQuoteCmdArg(a);
-            }
-            argline += '"';
-            return [argline];
-          }
-        }
-        return this.args;
-      }
-      _endsWith(str, end) {
-        return str.endsWith(end);
-      }
-      _isCmdFile() {
-        const upperToolPath = this.toolPath.toUpperCase();
-        return this._endsWith(upperToolPath, ".CMD") || this._endsWith(upperToolPath, ".BAT");
-      }
-      _windowsQuoteCmdArg(arg) {
-        if (!this._isCmdFile()) {
-          return this._uvQuoteCmdArg(arg);
-        }
-        if (!arg) {
-          return '""';
-        }
-        const cmdSpecialChars = [
-          " ",
-          "	",
-          "&",
-          "(",
-          ")",
-          "[",
-          "]",
-          "{",
-          "}",
-          "^",
-          "=",
-          ";",
-          "!",
-          "'",
-          "+",
-          ",",
-          "`",
-          "~",
-          "|",
-          "<",
-          ">",
-          '"'
-        ];
-        let needsQuotes = false;
-        for (const char of arg) {
-          if (cmdSpecialChars.some((x) => x === char)) {
-            needsQuotes = true;
-            break;
-          }
-        }
-        if (!needsQuotes) {
-          return arg;
-        }
-        let reverse = '"';
-        let quoteHit = true;
-        for (let i = arg.length; i > 0; i--) {
-          reverse += arg[i - 1];
-          if (quoteHit && arg[i - 1] === "\\") {
-            reverse += "\\";
-          } else if (arg[i - 1] === '"') {
-            quoteHit = true;
-            reverse += '"';
-          } else {
-            quoteHit = false;
-          }
-        }
-        reverse += '"';
-        return reverse.split("").reverse().join("");
-      }
-      _uvQuoteCmdArg(arg) {
-        if (!arg) {
-          return '""';
-        }
-        if (!arg.includes(" ") && !arg.includes("	") && !arg.includes('"')) {
-          return arg;
-        }
-        if (!arg.includes('"') && !arg.includes("\\")) {
-          return `"${arg}"`;
-        }
-        let reverse = '"';
-        let quoteHit = true;
-        for (let i = arg.length; i > 0; i--) {
-          reverse += arg[i - 1];
-          if (quoteHit && arg[i - 1] === "\\") {
-            reverse += "\\";
-          } else if (arg[i - 1] === '"') {
-            quoteHit = true;
-            reverse += "\\";
-          } else {
-            quoteHit = false;
-          }
-        }
-        reverse += '"';
-        return reverse.split("").reverse().join("");
-      }
-      _cloneExecOptions(options) {
-        options = options || {};
-        const result = {
-          cwd: options.cwd || process.cwd(),
-          env: options.env || process.env,
-          silent: options.silent || false,
-          windowsVerbatimArguments: options.windowsVerbatimArguments || false,
-          failOnStdErr: options.failOnStdErr || false,
-          ignoreReturnCode: options.ignoreReturnCode || false,
-          delay: options.delay || 1e4
-        };
-        result.outStream = options.outStream || process.stdout;
-        result.errStream = options.errStream || process.stderr;
-        return result;
-      }
-      _getSpawnOptions(options, toolPath) {
-        options = options || {};
-        const result = {};
-        result.cwd = options.cwd;
-        result.env = options.env;
-        result["windowsVerbatimArguments"] = options.windowsVerbatimArguments || this._isCmdFile();
-        if (options.windowsVerbatimArguments) {
-          result.argv0 = `"${toolPath}"`;
-        }
-        return result;
-      }
-      /**
-       * Exec a tool.
-       * Output will be streamed to the live console.
-       * Returns promise with return code
-       *
-       * @param     tool     path to tool to exec
-       * @param     options  optional exec options.  See ExecOptions
-       * @returns   number
-       */
-      exec() {
-        return __awaiter4(this, void 0, void 0, function* () {
-          if (!isRooted(this.toolPath) && (this.toolPath.includes("/") || IS_WINDOWS2 && this.toolPath.includes("\\"))) {
-            this.toolPath = path3.resolve(process.cwd(), this.options.cwd || process.cwd(), this.toolPath);
-          }
-          this.toolPath = yield which(this.toolPath, true);
-          return new Promise((resolve2, reject) => __awaiter4(this, void 0, void 0, function* () {
-            this._debug(`exec tool: ${this.toolPath}`);
-            this._debug("arguments:");
-            for (const arg of this.args) {
-              this._debug(`   ${arg}`);
-            }
-            const optionsNonNull = this._cloneExecOptions(this.options);
-            if (!optionsNonNull.silent && optionsNonNull.outStream) {
-              optionsNonNull.outStream.write(this._getCommandString(optionsNonNull) + os3.EOL);
-            }
-            const state = new ExecState(optionsNonNull, this.toolPath);
-            state.on("debug", (message) => {
-              this._debug(message);
-            });
-            if (this.options.cwd && !(yield exists(this.options.cwd))) {
-              return reject(new Error(`The cwd: ${this.options.cwd} does not exist!`));
-            }
-            const fileName = this._getSpawnFileName();
-            const cp = child.spawn(fileName, this._getSpawnArgs(optionsNonNull), this._getSpawnOptions(this.options, fileName));
-            let stdbuffer = "";
-            if (cp.stdout) {
-              cp.stdout.on("data", (data) => {
-                if (this.options.listeners && this.options.listeners.stdout) {
-                  this.options.listeners.stdout(data);
-                }
-                if (!optionsNonNull.silent && optionsNonNull.outStream) {
-                  optionsNonNull.outStream.write(data);
-                }
-                stdbuffer = this._processLineBuffer(data, stdbuffer, (line) => {
-                  if (this.options.listeners && this.options.listeners.stdline) {
-                    this.options.listeners.stdline(line);
-                  }
-                });
-              });
-            }
-            let errbuffer = "";
-            if (cp.stderr) {
-              cp.stderr.on("data", (data) => {
-                state.processStderr = true;
-                if (this.options.listeners && this.options.listeners.stderr) {
-                  this.options.listeners.stderr(data);
-                }
-                if (!optionsNonNull.silent && optionsNonNull.errStream && optionsNonNull.outStream) {
-                  const s = optionsNonNull.failOnStdErr ? optionsNonNull.errStream : optionsNonNull.outStream;
-                  s.write(data);
-                }
-                errbuffer = this._processLineBuffer(data, errbuffer, (line) => {
-                  if (this.options.listeners && this.options.listeners.errline) {
-                    this.options.listeners.errline(line);
-                  }
-                });
-              });
-            }
-            cp.on("error", (err) => {
-              state.processError = err.message;
-              state.processExited = true;
-              state.processClosed = true;
-              state.CheckComplete();
-            });
-            cp.on("exit", (code) => {
-              state.processExitCode = code;
-              state.processExited = true;
-              this._debug(`Exit code ${code} received from tool '${this.toolPath}'`);
-              state.CheckComplete();
-            });
-            cp.on("close", (code) => {
-              state.processExitCode = code;
-              state.processExited = true;
-              state.processClosed = true;
-              this._debug(`STDIO streams have closed for tool '${this.toolPath}'`);
-              state.CheckComplete();
-            });
-            state.on("done", (error2, exitCode) => {
-              if (stdbuffer.length > 0) {
-                this.emit("stdline", stdbuffer);
-              }
-              if (errbuffer.length > 0) {
-                this.emit("errline", errbuffer);
-              }
-              cp.removeAllListeners();
-              if (error2) {
-                reject(error2);
-              } else {
-                resolve2(exitCode);
-              }
-            });
-            if (this.options.input) {
-              if (!cp.stdin) {
-                throw new Error("child process missing stdin");
-              }
-              cp.stdin.end(this.options.input);
-            }
-          }));
-        });
-      }
-    };
-    ExecState = class _ExecState extends events.EventEmitter {
-      constructor(options, toolPath) {
-        super();
-        this.processClosed = false;
-        this.processError = "";
-        this.processExitCode = 0;
-        this.processExited = false;
-        this.processStderr = false;
-        this.delay = 1e4;
-        this.done = false;
-        this.timeout = null;
-        if (!toolPath) {
-          throw new Error("toolPath must not be empty");
-        }
-        this.options = options;
-        this.toolPath = toolPath;
-        if (options.delay) {
-          this.delay = options.delay;
-        }
-      }
-      CheckComplete() {
-        if (this.done) {
-          return;
-        }
-        if (this.processClosed) {
-          this._setResult();
-        } else if (this.processExited) {
-          this.timeout = setTimeout2(_ExecState.HandleTimeout, this.delay, this);
-        }
-      }
-      _debug(message) {
-        this.emit("debug", message);
-      }
-      _setResult() {
-        let error2;
-        if (this.processExited) {
-          if (this.processError) {
-            error2 = new Error(`There was an error when attempting to execute the process '${this.toolPath}'. This may indicate the process failed to start. Error: ${this.processError}`);
-          } else if (this.processExitCode !== 0 && !this.options.ignoreReturnCode) {
-            error2 = new Error(`The process '${this.toolPath}' failed with exit code ${this.processExitCode}`);
-          } else if (this.processStderr && this.options.failOnStdErr) {
-            error2 = new Error(`The process '${this.toolPath}' failed because one or more lines were written to the STDERR stream`);
-          }
-        }
-        if (this.timeout) {
-          clearTimeout(this.timeout);
-          this.timeout = null;
-        }
-        this.done = true;
-        this.emit("done", error2, this.processExitCode);
-      }
-      static HandleTimeout(state) {
-        if (state.done) {
-          return;
-        }
-        if (!state.processClosed && state.processExited) {
-          const message = `The STDIO streams did not close within ${state.delay / 1e3} seconds of the exit event from process '${state.toolPath}'. This may indicate a child process inherited the STDIO streams and has not yet exited.`;
-          state._debug(message);
-        }
-        state._setResult();
-      }
-    };
+var ExecState = class _ExecState extends events.EventEmitter {
+  constructor(options, toolPath) {
+    super();
+    this.processClosed = false;
+    this.processError = "";
+    this.processExitCode = 0;
+    this.processExited = false;
+    this.processStderr = false;
+    this.delay = 1e4;
+    this.done = false;
+    this.timeout = null;
+    if (!toolPath) {
+      throw new Error("toolPath must not be empty");
+    }
+    this.options = options;
+    this.toolPath = toolPath;
+    if (options.delay) {
+      this.delay = options.delay;
+    }
   }
-});
+  CheckComplete() {
+    if (this.done) {
+      return;
+    }
+    if (this.processClosed) {
+      this._setResult();
+    } else if (this.processExited) {
+      this.timeout = setTimeout2(_ExecState.HandleTimeout, this.delay, this);
+    }
+  }
+  _debug(message) {
+    this.emit("debug", message);
+  }
+  _setResult() {
+    let error2;
+    if (this.processExited) {
+      if (this.processError) {
+        error2 = new Error(`There was an error when attempting to execute the process '${this.toolPath}'. This may indicate the process failed to start. Error: ${this.processError}`);
+      } else if (this.processExitCode !== 0 && !this.options.ignoreReturnCode) {
+        error2 = new Error(`The process '${this.toolPath}' failed with exit code ${this.processExitCode}`);
+      } else if (this.processStderr && this.options.failOnStdErr) {
+        error2 = new Error(`The process '${this.toolPath}' failed because one or more lines were written to the STDERR stream`);
+      }
+    }
+    if (this.timeout) {
+      clearTimeout(this.timeout);
+      this.timeout = null;
+    }
+    this.done = true;
+    this.emit("done", error2, this.processExitCode);
+  }
+  static HandleTimeout(state) {
+    if (state.done) {
+      return;
+    }
+    if (!state.processClosed && state.processExited) {
+      const message = `The STDIO streams did not close within ${state.delay / 1e3} seconds of the exit event from process '${state.toolPath}'. This may indicate a child process inherited the STDIO streams and has not yet exited.`;
+      state._debug(message);
+    }
+    state._setResult();
+  }
+};
 
 // node_modules/@actions/exec/lib/exec.js
+var __awaiter5 = function(thisArg, _arguments, P, generator) {
+  function adopt(value) {
+    return value instanceof P ? value : new P(function(resolve2) {
+      resolve2(value);
+    });
+  }
+  return new (P || (P = Promise))(function(resolve2, reject) {
+    function fulfilled(value) {
+      try {
+        step(generator.next(value));
+      } catch (e) {
+        reject(e);
+      }
+    }
+    function rejected(value) {
+      try {
+        step(generator["throw"](value));
+      } catch (e) {
+        reject(e);
+      }
+    }
+    function step(result) {
+      result.done ? resolve2(result.value) : adopt(result.value).then(fulfilled, rejected);
+    }
+    step((generator = generator.apply(thisArg, _arguments || [])).next());
+  });
+};
 function exec(commandLine, args, options) {
   return __awaiter5(this, void 0, void 0, function* () {
     const commandArgs = argStringToArray(commandLine);
@@ -20161,53 +20124,17 @@ function exec(commandLine, args, options) {
     return runner.exec();
   });
 }
-var __awaiter5;
-var init_exec = __esm({
-  "node_modules/@actions/exec/lib/exec.js"() {
-    init_toolrunner();
-    __awaiter5 = function(thisArg, _arguments, P, generator) {
-      function adopt(value) {
-        return value instanceof P ? value : new P(function(resolve2) {
-          resolve2(value);
-        });
-      }
-      return new (P || (P = Promise))(function(resolve2, reject) {
-        function fulfilled(value) {
-          try {
-            step(generator.next(value));
-          } catch (e) {
-            reject(e);
-          }
-        }
-        function rejected(value) {
-          try {
-            step(generator["throw"](value));
-          } catch (e) {
-            reject(e);
-          }
-        }
-        function step(result) {
-          result.done ? resolve2(result.value) : adopt(result.value).then(fulfilled, rejected);
-        }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-      });
-    };
-  }
-});
 
 // node_modules/@actions/core/lib/platform.js
-import os4 from "os";
-var platform, arch;
-var init_platform = __esm({
-  "node_modules/@actions/core/lib/platform.js"() {
-    init_exec();
-    platform = os4.platform();
-    arch = os4.arch();
-  }
-});
+var platform = os4.platform();
+var arch = os4.arch();
 
 // node_modules/@actions/core/lib/core.js
-import * as os5 from "os";
+var ExitCode;
+(function(ExitCode2) {
+  ExitCode2[ExitCode2["Success"] = 0] = "Success";
+  ExitCode2[ExitCode2["Failure"] = 1] = "Failure";
+})(ExitCode || (ExitCode = {}));
 function getInput(name, options) {
   const val = process.env[`INPUT_${name.replace(/ /g, "_").toUpperCase()}`] || "";
   if (options && options.required && !val) {
@@ -20236,81 +20163,57 @@ function error(message, properties = {}) {
 function info(message) {
   process.stdout.write(message + os5.EOL);
 }
-var ExitCode;
-var init_core = __esm({
-  "node_modules/@actions/core/lib/core.js"() {
-    init_command();
-    init_file_command();
-    init_utils();
-    init_oidc_utils();
-    init_summary();
-    init_summary();
-    init_path_utils();
-    init_platform();
-    (function(ExitCode2) {
-      ExitCode2[ExitCode2["Success"] = 0] = "Success";
-      ExitCode2[ExitCode2["Failure"] = 1] = "Failure";
-    })(ExitCode || (ExitCode = {}));
-  }
-});
 
 // src/index.js
-var require_index = __commonJS({
-  "src/index.js"() {
-    init_core();
-    init_exec();
-    async function run() {
-      try {
-        const path4 = getInput("path");
-        const severity = getInput("severity");
-        let output = "";
-        const exitCode = await exec(
-          "shellcheck",
-          [
-            "--format=json",
-            `--severity=${severity}`,
-            path4
-          ],
-          {
-            listeners: {
-              stdout: (data) => {
-                output += data.toString();
-              }
-            },
-            ignoreReturnCode: true
+async function run() {
+  try {
+    const path4 = getInput("path");
+    const severity = getInput("severity");
+    let output = "";
+    const exitCode = await exec(
+      "shellcheck",
+      [
+        "--format=json",
+        `--severity=${severity}`,
+        path4
+      ],
+      {
+        listeners: {
+          stdout: (data) => {
+            output += data.toString();
           }
-        );
-        const issues = JSON.parse(output || "[]");
-        const table = [
-          [
-            { data: "File", header: true },
-            { data: "Line", header: true },
-            { data: "Level", header: true },
-            { data: "Code", header: true },
-            { data: "Message", header: true }
-          ]
-        ];
-        for (const issue2 of issues) {
-          table.push([
-            issue2.file,
-            String(issue2.line),
-            issue2.level,
-            `SC${issue2.code}`,
-            issue2.message
-          ]);
-        }
-        await summary.addHeading("ShellCheck Report").addRaw(`Found ${issues.length} issue(s).
-`).addTable(table).write();
-        setOutput("issues", issues.length);
-        info(`ShellCheck exit code: ${exitCode}`);
-      } catch (error2) {
-        setFailed(error2 instanceof Error ? error2.message : String(error2));
+        },
+        ignoreReturnCode: true
       }
+    );
+    const issues = JSON.parse(output || "[]");
+    const table = [
+      [
+        { data: "File", header: true },
+        { data: "Line", header: true },
+        { data: "Level", header: true },
+        { data: "Code", header: true },
+        { data: "Message", header: true }
+      ]
+    ];
+    for (const issue2 of issues) {
+      table.push([
+        issue2.file,
+        String(issue2.line),
+        issue2.level,
+        `SC${issue2.code}`,
+        issue2.message
+      ]);
     }
-    run();
+    await summary.addHeading("ShellCheck Report").addRaw(`Found ${issues.length} issue(s).
+`).addTable(table).write();
+    setOutput("issues", issues.length);
+    info(`ShellCheck exit code: ${exitCode}`);
+  } catch (error2) {
+    setFailed(error2 instanceof Error ? error2.message : String(error2));
   }
-});
-export default require_index();
+}
+run();
 /*! Bundled license information:
 
 undici/lib/web/fetch/body.js:
