@@ -1,0 +1,23 @@
+name: ShellCheck Report
+description: Run ShellCheck and generate a table report
+
+author: James
+
+inputs:
+  path:
+    description: Files or directories to scan
+    required: false
+    default: "."
+
+  severity:
+    description: Minimum ShellCheck severity
+    required: false
+    default: "style"
+
+runs:
+  using: node24
+  main: dist/index.js
+
+branding:
+  icon: check-circle
+  color: green

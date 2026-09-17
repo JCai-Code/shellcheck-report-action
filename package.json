@@ -1,0 +1,31 @@
+{
+  "name": "shellcheck-report-action",
+  "version": "1.0.0",
+  "type": "commonjs",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "build": "esbuild src/index.js --bundle --platform=node --format=esm --target=node24 --outfile=dist/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JCai-Code/shellcheck-report-action.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/JCai-Code/shellcheck-report-action/issues"
+  },
+  "homepage": "https://github.com/JCai-Code/shellcheck-report-action#readme",
+  "dependencies": {
+    "@actions/core": "^3.0.1",
+    "@actions/exec": "^3.0.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2"
+  }
+}

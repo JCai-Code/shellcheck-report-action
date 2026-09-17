@@ -1,0 +1,17 @@
+name: Test Action
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Test ShellCheck Report
+        uses: ./
+        with:
+          path: "test/*.sh"
