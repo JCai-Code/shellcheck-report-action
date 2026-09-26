@@ -14,9 +14,21 @@ inputs:
     required: false
     default: "style"
 
+outputs:
+  issues:
+    description: Number of ShellCheck issues
+    value: ${{ steps.shellcheck-report.outputs.issues }}
+
 runs:
-  using: node24
-  main: dist/index.cjs
+  using: composite
+  steps:
+    - name: Run ShellCheck Report
+      id: shellcheck-report
+      shell: bash
+      env:
+        INPUT_PATH: ${{ inputs.path }}
+        INPUT_SEVERITY: ${{ inputs.severity }}
+      run: python3 "${{ github.action_path }}/src/main.py"
 
 branding:
   icon: check-circle
