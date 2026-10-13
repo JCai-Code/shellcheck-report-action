@@ -16,3 +16,4 @@ jobs:
         with:
           path: "test/*.sh"
           severity: style
+          exclude-issues: "SC2006"

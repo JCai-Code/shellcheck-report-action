@@ -5,14 +5,23 @@ author: James
 
 inputs:
   path:
-    description: Files or directories to scan
+    description: Files or directories to scan. Default(.)
     required: false
     default: "."
 
   severity:
-    description: Minimum ShellCheck severity
+    description: Specify minimum severity of errors to consider [style, info, warning, error]. Default(style)
     required: false
     default: "style"
+
+  exclude-paths:
+    description: Exclude files and folders from ShellCheck scan.
+    required: false
+
+  exclude-issues:
+    description: Specify shellcheck issues to exclude during scan
+    required: false
+
 
 outputs:
   issues:
@@ -28,6 +37,8 @@ runs:
       env:
         INPUT_PATH: ${{ inputs.path }}
         INPUT_SEVERITY: ${{ inputs.severity }}
+        INPUT_EXCLUDE-PATHS: ${{ inputs.exclude-paths }}
+        INPUT_EXCLUDE-ISSUES: ${{ inputs.exclude-issues }}
       run: python3 "${{ github.action_path }}/src/main.py"
 
 branding:
