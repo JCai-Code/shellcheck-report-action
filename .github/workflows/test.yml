@@ -17,4 +17,4 @@ jobs:
           path: "test/**.sh"
           severity: style
           # exclude-issues: "SC2006"
-          exclude-paths: "test"
+          exclude-paths: "test/bad.sh"
