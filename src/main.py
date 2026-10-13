@@ -40,6 +40,7 @@ def main():
         for file in glob.glob(pattern, recursive=True)
         if not is_excluded_path(file, excluded_paths)
     ]
+    print(f"files: {files}")
 
     if not files:
         print(f"::warning::No files matched pattern: {pattern}")
