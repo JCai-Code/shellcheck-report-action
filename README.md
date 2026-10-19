@@ -1,5 +1,7 @@
 # ShellCheck Report
 
+English | [简体中文](README.zh-CN.md)
+
 Run ShellCheck and generate a report in the GitHub Actions Job Summary.
 
 ## Usage
