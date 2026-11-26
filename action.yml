@@ -7,7 +7,7 @@ inputs:
   path:
     description: Files or directories to scan. Default(.)
     required: false
-    default: "."
+    default: "**/*.sh"
 
   severity:
     description: Specify minimum severity of errors to consider [style, info, warning, error]. Default(style)
